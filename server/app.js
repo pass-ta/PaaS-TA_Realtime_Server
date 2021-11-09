@@ -67,8 +67,8 @@ io.sockets.on('connection',(socket)=> {
           roomtype:data.roomtype,
           roomowner:data.roomowner,
           audio: data.audio,
-          video:data.video
-
+          video:data.video,
+          share:data.share
         
         })
       }
@@ -82,7 +82,8 @@ io.sockets.on('connection',(socket)=> {
         roomtype:data.roomtype,
         roomowner:data.roomowner,
         audio: data.audio,
-        video:data.video
+        video:data.video,
+        share:data.share
 
       }]
     }
@@ -101,7 +102,9 @@ io.sockets.on('connection',(socket)=> {
     const userInThisRoom = users[data.room].filter(user=>user.id!==socket.id)
     console.log("현재 들어온 사람을 뺸 나머지 사용자들:"+JSON.stringify(userInThisRoom))
     console.log("현재 들어온 사람 아이디 = socketid= "+socket.id)
-    io.sockets.to(socket.id).emit('all_users', userInThisRoom,mydata[0])
+    console.log("mydata share 체크 하기"+mydata[0].share)
+    io.sockets.to(socket.id).emit('all_users', userInThisRoom,mydata[0]) 
+
   })
   socket.on('offer',data=> {
     let sdp = data.sdp
@@ -111,8 +114,9 @@ io.sockets.on('connection',(socket)=> {
     let audio = data.audio
     let video = data.video
     let offerroomowner = data.offerroomowner
+    let share = data.share
     //사용자 말고 방장Id도 emit해주도록 작성하기
-    socket.to(data.offerReciveID).emit('getOffer',{sdp,offerSendId,offerSendEmail,offerSendnickname,offerroomowner,audio,video})
+    socket.to(data.offerReciveID).emit('getOffer',{sdp,offerSendId,offerSendEmail,offerSendnickname,offerroomowner,audio,video,share})
   })
   socket.on('answer',data=> {
     let sdp = data.sdp
@@ -143,10 +147,12 @@ io.sockets.on('connection',(socket)=> {
           return;
       }
     }
+  
     console.log("test"+username)
     console.log(roomID)
     socket.to(roomID).emit('user_exit', {id: socket.id,nickname:username.nickname});
     console.log(users);
+    
   })
   // -------------------------------------채팅관련 --------------------------
   socket.on("message",data=> {
@@ -157,6 +163,10 @@ io.sockets.on('connection',(socket)=> {
     console.log("test : "+test_int)
     console.log("roomID:"+socketToRoom[socket.id])
     io.to(socketToRoom[socket.id]).emit('message',data)
+  })
+  socket.on("sharesetting",(data,streamId)=> {
+    console.log("share&& streamid체크"+data+streamId)
+    io.emit("receive_sharesetting",data,streamId)
   })
   //------------------------------------gaze알람 관련----------------------
   // socket.on("gazealert",(data)=> {
