@@ -104,7 +104,7 @@ io.sockets.on('connection',(socket)=> {
     console.log("현재 들어온 사람 아이디 = socketid= "+socket.id)
     console.log("mydata share 체크 하기"+mydata[0].share)
     io.sockets.to(socket.id).emit('all_users', userInThisRoom,mydata[0]) 
-
+ 
   })
   socket.on('offer',data=> {
     let sdp = data.sdp
