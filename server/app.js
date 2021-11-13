@@ -168,6 +168,11 @@ io.sockets.on('connection',(socket)=> {
     console.log("share&& streamid체크"+data+streamId)
     io.emit("receive_sharesetting",data,streamId)
   })
+  //----------------------음성인식 STT -----------------------
+  socket.on("stt_message",data=> {
+    console.log("stt_message"+data.message)
+    io.emit("receive_stt_message",data)
+  })
   //------------------------------------gaze알람 관련----------------------
   // socket.on("gazealert",(data)=> {
   //   const roomID = socketToRoom[socket.id];
