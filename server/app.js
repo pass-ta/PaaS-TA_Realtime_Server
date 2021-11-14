@@ -3,24 +3,24 @@ const app = require("express")();
 //실제로 배포시 https로 배포해야한다.
 const https = require('https')
 const cors = require('cors')
-
+app.use(cors())
 //테스트용 http
 const http = require('http')
 
 const fs = require('fs');
-const options = {
-    key: fs.readFileSync('./private.pem'),
-    cert: fs.readFileSync('./public.pem')
-}
-const httpsServer = https.createServer(options,app)
-// const httpServer = http.createServer(options,app)
-const io = require('socket.io')(httpsServer,{
+// const options = {
+//     key: fs.readFileSync('./private.pem'),
+//     cert: fs.readFileSync('./public.pem')
+// }
+// const httpsServer = https.createServer(options,app)
+const httpServer = http.createServer(app)
+const io = require('socket.io')(httpServer,{
   cors:{
     origin:"*",
-    credential:true
   }
 })
-
+app.set('view engine', 'ejs'); // 렌더링 엔진 모드를 ejs로 설정
+app.set('views',  __dirname + '/views');    // ejs이 있는 폴더를 지정
 
 let users = {}
 let socketToRoom = {}
@@ -32,7 +32,10 @@ const rooomOption = ""
 //test 모드의 경우 maximum은 찾아보기
 
 var test_int=0;
-io.sockets.on('connection',(socket)=> {
+module.exports = (app) =>{
+  
+}
+io.on('connection',(socket)=> {
   console.log('it work?')
   socket.on('user_update',(data)=> {
     console.log("유저업데이트 체크!:"+JSON.stringify(data))
@@ -195,9 +198,11 @@ io.sockets.on('connection',(socket)=> {
 
 
 
+// httpsServer.listen
 
-
-httpsServer.listen(4000, () => {
-  console.log('HTTPS Server is running at 4000!');
+httpServer.listen(8080, () => {
+  console.log('HTTPS Server is running at 8080!');
   console.log("server is healthy")
 });
+
+module.exports = app;

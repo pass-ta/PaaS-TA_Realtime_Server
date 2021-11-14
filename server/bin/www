@@ -11,13 +11,18 @@ var http = require('http');
 /**
  * Get port from environment and store in Express.
  */
-
-var port = normalizePort(process.env.PORT || '3000');
+//  var port = "4000";
+var port = normalizePort(process.env.PORT || '8080');
+console.log("prot : ",process.env.PORT)
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
+
+// var server = http.createServer(app).listen(app.get('port'), function(){
+//   console.log('Express server listening on port ' + app.get('port'));
+// });
 
 var server = http.createServer(app);
 
