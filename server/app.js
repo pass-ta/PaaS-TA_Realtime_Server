@@ -194,12 +194,12 @@ io.sockets.on('connection',(socket)=> {
     io.emit("receive_stt_message",data)
   })
   socket.on("translate_stt_message",data=> {
-    try{
-      const result =  translate(data.message,{to:'en'})
-      console.log(result)
-    }catch(err){
-      console.log(err)
-    }
+    // try{
+    //   const result =  translate(data.message,{to:'en'})
+    //   console.log(result)
+    // }catch(err){
+    //   console.log(err)
+    // }
     
     io.emit("receive_translate_stt_message",data)
   })
