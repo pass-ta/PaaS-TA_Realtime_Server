@@ -8,10 +8,12 @@ const cors = require('cors')
 const http = require('http')
 
 const fs = require('fs');
+const { format } = require("path");
 const options = {
     key: fs.readFileSync('./private.pem'),
     cert: fs.readFileSync('./public.pem')
 }
+const translate = require("google-translate-api")
 const httpsServer = https.createServer(options,app)
 // const httpServer = http.createServer(options,app)
 const io = require('socket.io')(httpsServer,{
@@ -30,7 +32,7 @@ const maximum = process.env.MAXIMUM ||8
 const rooomOption = ""
 //study 모드의 경우 maximum을 4~8 명으로 정하고(유료화를 위해)
 //test 모드의 경우 maximum은 찾아보기
-
+// var tempmessage = []
 var test_int=0;
 io.sockets.on('connection',(socket)=> {
   console.log('it work?')
@@ -71,6 +73,10 @@ io.sockets.on('connection',(socket)=> {
           share:data.share
         
         })
+        // tempmessage.push({
+        //   nickname:data.nickname,
+        //   message:null
+        // })
       }
      
 
@@ -86,6 +92,10 @@ io.sockets.on('connection',(socket)=> {
         share:data.share
 
       }]
+      // tempmessage.push({
+      //   nickname:data.nickname,
+      //   message:null
+      // })
     }
     socketToRoom[socket.id] = data.room
     socket.join(data.room)
@@ -147,7 +157,7 @@ io.sockets.on('connection',(socket)=> {
           return;
       }
     }
-  
+    // tempmessage.filter(a=>a.nickname!=username)
     console.log("test"+username)
     console.log(roomID)
     socket.to(roomID).emit('user_exit', {id: socket.id,nickname:username.nickname});
@@ -169,9 +179,29 @@ io.sockets.on('connection',(socket)=> {
     io.emit("receive_sharesetting",data,streamId)
   })
   //----------------------음성인식 STT -----------------------
+  
   socket.on("stt_message",data=> {
     console.log("stt_message"+data.message)
+    // if(tempmessage.findIndex(obj=>obj.nickname==""+data.nickname)+1){
+    //   let i = tempmessage.findIndex(obj=>obj.nickname===data.nickname)
+    //   tempmessage[i].message = data.message
+    //   io.emit("receive_stt_message",tempmessage)
+    // }else {
+    //   tempmessage.push(data)
+    //   io.emit("receive_stt_message",tempmessage)
+    // }
+    // console.log(tempmessage.findIndex(obj=>obj.nickname==""+data.nickname))
     io.emit("receive_stt_message",data)
+  })
+  socket.on("translate_stt_message",data=> {
+    try{
+      const result =  translate(data.message,{to:'en'})
+      console.log(result)
+    }catch(err){
+      console.log(err)
+    }
+    
+    io.emit("receive_translate_stt_message",data)
   })
   //------------------------------------gaze알람 관련----------------------
   // socket.on("gazealert",(data)=> {
