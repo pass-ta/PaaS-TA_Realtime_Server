@@ -38,36 +38,37 @@ module.exports = (app) =>{
 // translate using Naver API config
 var naver_client_id = 'zM8ct44XyZAzOICrS7wO';
 var naver_client_secret = 'TzsZClpkcc';
-var subtitle = '안녕하세요'
-var translate =  function(){
+var subtitle = '안녕하세요. 오늘의 수업은 수학입니다. 수업을 시작하겠습니다.'
+var translatedText = ""
+var translate =   function(){
   var api_url = 'https://openapi.naver.com/v1/papago/n2mt';
   var request = require('request');
   var options = {
-      url: api_url,
-      form: {'source':'ko', 'target':'en', 'text':subtitle},
-      headers: {'X-Naver-Client-Id':naver_client_id, 'X-Naver-Client-Secret': naver_client_secret}
-    };
+    url: api_url,
+    form: {'source':'ko', 'target':'en', 'text':subtitle},
+    headers: {'X-Naver-Client-Id':naver_client_id, 'X-Naver-Client-Secret': naver_client_secret}
+  };
   request.post(options, function (error, response, body) {
     if (!error && response.statusCode == 200) {
-      const translatedText = JSON.parse(body).message.result.translatedText
-      console.log("Text",translatedText);;
+      translatedText = JSON.parse(body).message.result.translatedText
+      console.log("번역 :",translatedText);;
+
       return translatedText;
     } else {
       console.log('error = ' + response.statusCode);
     }
   });
+  
 }
 var m ="";
 app.get('/hyewon',function(req, res){
   var body = translate();
   console.log("get")
-  console.log("hi",body)
-  res.writeHead(200, {'Content-Type': 'text/json;charset=utf-8'});
-  res.send(body);
-  console.log("fun2")
-  m = translate();
-  console.log(m)
+
+  console.log(translatedText)
 })
+
+
 io.on('connection',(socket)=> {
   console.log('it work?')
   socket.on('user_update',(data)=> {
