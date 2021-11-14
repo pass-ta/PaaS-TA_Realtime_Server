@@ -35,6 +35,39 @@ var test_int=0;
 module.exports = (app) =>{
   
 }
+// translate using Naver API config
+var naver_client_id = 'zM8ct44XyZAzOICrS7wO';
+var naver_client_secret = 'TzsZClpkcc';
+var subtitle = '안녕하세요'
+var translate =  function(){
+  var api_url = 'https://openapi.naver.com/v1/papago/n2mt';
+  var request = require('request');
+  var options = {
+      url: api_url,
+      form: {'source':'ko', 'target':'en', 'text':subtitle},
+      headers: {'X-Naver-Client-Id':naver_client_id, 'X-Naver-Client-Secret': naver_client_secret}
+    };
+  request.post(options, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      const translatedText = JSON.parse(body).message.result.translatedText
+      console.log("Text",translatedText);;
+      return translatedText;
+    } else {
+      console.log('error = ' + response.statusCode);
+    }
+  });
+}
+var m ="";
+app.get('/hyewon',function(req, res){
+  var body = translate();
+  console.log("get")
+  console.log("hi",body)
+  res.writeHead(200, {'Content-Type': 'text/json;charset=utf-8'});
+  res.send(body);
+  console.log("fun2")
+  m = translate();
+  console.log(m)
+})
 io.on('connection',(socket)=> {
   console.log('it work?')
   socket.on('user_update',(data)=> {
@@ -174,6 +207,9 @@ io.on('connection',(socket)=> {
   //----------------------음성인식 STT -----------------------
   socket.on("stt_message",data=> {
     console.log("stt_message"+data.message)
+    var translated_subtitles = translate()
+    io.emit("hh",translated_subtitles)
+
     io.emit("receive_stt_message",data)
   })
   //------------------------------------gaze알람 관련----------------------
