@@ -3,26 +3,24 @@ const app = require("express")();
 //실제로 배포시 https로 배포해야한다.
 const https = require('https')
 const cors = require('cors')
-
+app.use(cors())
 //테스트용 http
 const http = require('http')
 
 const fs = require('fs');
-const { format } = require("path");
-const options = {
-    key: fs.readFileSync('./private.pem'),
-    cert: fs.readFileSync('./public.pem')
-}
-const translate = require("google-translate-api")
-const httpsServer = https.createServer(options,app)
-// const httpServer = http.createServer(options,app)
-const io = require('socket.io')(httpsServer,{
+// const options = {
+//     key: fs.readFileSync('./private.pem'),
+//     cert: fs.readFileSync('./public.pem')
+// }
+// const httpsServer = https.createServer(options,app)
+const httpServer = http.createServer(app)
+const io = require('socket.io')(httpServer,{
   cors:{
     origin:"*",
-    credential:true
   }
 })
-
+app.set('view engine', 'ejs'); // 렌더링 엔진 모드를 ejs로 설정
+app.set('views',  __dirname + '/views');    // ejs이 있는 폴더를 지정
 
 let users = {}
 let socketToRoom = {}
@@ -32,9 +30,24 @@ const maximum = process.env.MAXIMUM ||8
 const rooomOption = ""
 //study 모드의 경우 maximum을 4~8 명으로 정하고(유료화를 위해)
 //test 모드의 경우 maximum은 찾아보기
-// var tempmessage = []
+
 var test_int=0;
-io.sockets.on('connection',(socket)=> {
+module.exports = (app) =>{
+  
+}
+// translate using Naver API config
+var naver_client_id = 'zM8ct44XyZAzOICrS7wO';
+var naver_client_secret = 'TzsZClpkcc';
+var subtitle = '안녕하세요. 오늘의 수업은 수학입니다. 수업을 시작하겠습니다.'
+var translatedText = ""
+var translate =   function(){
+  
+  
+}
+
+
+
+io.on('connection',(socket)=> {
   console.log('it work?')
   socket.on('user_update',(data)=> {
     console.log("유저업데이트 체크!:"+JSON.stringify(data))
@@ -73,10 +86,6 @@ io.sockets.on('connection',(socket)=> {
           share:data.share
         
         })
-        // tempmessage.push({
-        //   nickname:data.nickname,
-        //   message:null
-        // })
       }
      
 
@@ -92,10 +101,6 @@ io.sockets.on('connection',(socket)=> {
         share:data.share
 
       }]
-      // tempmessage.push({
-      //   nickname:data.nickname,
-      //   message:null
-      // })
     }
     socketToRoom[socket.id] = data.room
     socket.join(data.room)
@@ -157,7 +162,7 @@ io.sockets.on('connection',(socket)=> {
           return;
       }
     }
-    // tempmessage.filter(a=>a.nickname!=username)
+  
     console.log("test"+username)
     console.log(roomID)
     socket.to(roomID).emit('user_exit', {id: socket.id,nickname:username.nickname});
@@ -178,46 +183,65 @@ io.sockets.on('connection',(socket)=> {
     console.log("share&& streamid체크"+data+streamId)
     io.emit("receive_sharesetting",data,streamId)
   })
-  //----------------------음성인식 STT -----------------------
+   //----------------------음성인식 STT -----------------------
   
-  socket.on("stt_message",data=> {
-    console.log("stt_message"+data.message)
-    // if(tempmessage.findIndex(obj=>obj.nickname==""+data.nickname)+1){
-    //   let i = tempmessage.findIndex(obj=>obj.nickname===data.nickname)
-    //   tempmessage[i].message = data.message
-    //   io.emit("receive_stt_message",tempmessage)
-    // }else {
-    //   tempmessage.push(data)
-    //   io.emit("receive_stt_message",tempmessage)
-    // }
-    // console.log(tempmessage.findIndex(obj=>obj.nickname==""+data.nickname))
-    io.emit("receive_stt_message",data)
-  })
-  socket.on("translate_stt_message",data=> {
-    // try{
-    //   const result =  translate(data.message,{to:'en'})
-    //   console.log(result)
-    // }catch(err){
-    //   console.log(err)
-    // }
-    
-    io.emit("receive_translate_stt_message",data)
-  })
-  //------------------------------------gaze알람 관련----------------------
-  // socket.on("gazealert",(data)=> {
-  //   const roomID = socketToRoom[socket.id];
-  //   let room = users[roomID];
-  //   let nickname = data.nickname
-  //   let email = data.email
-  //   let gazeOption = data.gazeOption
-  //   if(room) {
-  //     console.log(JSON.stringify(gazeOption))
-  //     room = room.filter(user => user.email === user.roomowner);
-  //     io.to(room[0].id).emit('receiveGazeAlert',{nickname,email,gazeOption})
-  //     console.log(`send to ${room[0].id} = room owner`)
-  //   }
+ socket.on("stt_message",data=> {
+  console.log("stt_message"+data.message)
+  console.log("stt_message"+data.message2)
+  // if(tempmessage.findIndex(obj=>obj.nickname==""+data.nickname)+1){
+  //   let i = tempmessage.findIndex(obj=>obj.nickname===data.nickname)
+  //   tempmessage[i].message = data.message
+  //   io.emit("receive_stt_message",tempmessage)
+  // }else {
+  //   tempmessage.push(data)
+  //   io.emit("receive_stt_message",tempmessage)
+  // }
+  // console.log(tempmessage.findIndex(obj=>obj.nickname==""+data.nickname))
+  io.emit("receive_stt_message",data)
+})
+socket.on("translate_stt_message",data=> {
+  // try{
+  //   const result =  translate(data.message,{to:'en'})
+  //   console.log(result)
+  // }catch(err){
+  //   console.log(err)
+  // }
+  var api_url = 'https://openapi.naver.com/v1/papago/n2mt';
+  var request = require('request');
+  var options = {
+    url: api_url,
+    form: {'source':'ko', 'target':'en', 'text':data.message},
+    headers: {'X-Naver-Client-Id':naver_client_id, 'X-Naver-Client-Secret': naver_client_secret}
+  };
+  request.post(options, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      translatedText = JSON.parse(body).message.result.translatedText
+      console.log("번역 :",translatedText);;
+      data.message = translatedText
+      io.emit("receive_translate_stt_message",data)
+      
+    } else {
+      console.log('error = ' + response.statusCode);
+    }
+  });
+  
+  
+})
+//------------------------------------gaze알람 관련----------------------
+// socket.on("gazealert",(data)=> {
+//   const roomID = socketToRoom[socket.id];
+//   let room = users[roomID];
+//   let nickname = data.nickname
+//   let email = data.email
+//   let gazeOption = data.gazeOption
+//   if(room) {
+//     console.log(JSON.stringify(gazeOption))
+//     room = room.filter(user => user.email === user.roomowner);
+//     io.to(room[0].id).emit('receiveGazeAlert',{nickname,email,gazeOption})
+//     console.log(`send to ${room[0].id} = room owner`)
+//   }
 
-  // })
+// })
 })
 
 
@@ -225,9 +249,11 @@ io.sockets.on('connection',(socket)=> {
 
 
 
+// httpsServer.listen
 
-
-httpsServer.listen(4000, () => {
-  console.log('HTTPS Server is running at 4000!');
+httpServer.listen(8080, () => {
+  console.log('HTTPS Server is running at 8080!');
   console.log("server is healthy")
 });
+
+module.exports = app;
