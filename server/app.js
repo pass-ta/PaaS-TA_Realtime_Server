@@ -179,9 +179,9 @@ io.on('connection',(socket)=> {
     console.log("roomID:"+socketToRoom[socket.id])
     io.to(socketToRoom[socket.id]).emit('message',data)
   })
-  socket.on("sharesetting",(data,streamId)=> {
-    console.log("share&& streamid체크"+data+streamId)
-    io.emit("receive_sharesetting",data,streamId)
+  socket.on("sharesetting",(data)=> {
+    console.log("share&& streamid체크"+data)
+    io.emit("receive_sharesetting",data)
   })
    //----------------------음성인식 STT -----------------------
   
