@@ -200,24 +200,25 @@ io.on('connection',(socket)=> {
   io.emit("receive_stt_message",data)
 })
 socket.on("translate_stt_message",data=> {
-  // try{
-  //   const result =  translate(data.message,{to:'en'})
-  //   console.log(result)
-  // }catch(err){
-  //   console.log(err)
-  // }
+  let total_message = (data.message+" ! "+data.message2+" ! "+data.message3);
+
   var api_url = 'https://openapi.naver.com/v1/papago/n2mt';
   var request = require('request');
   var options = {
     url: api_url,
-    form: {'source':'ko', 'target':'en', 'text':data.message},
+    form: {'source':'ko', 'target':'en', 'text':total_message},
     headers: {'X-Naver-Client-Id':naver_client_id, 'X-Naver-Client-Secret': naver_client_secret}
   };
   request.post(options, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       translatedText = JSON.parse(body).message.result.translatedText
-      console.log("번역 :",translatedText);;
-      data.message = translatedText
+      console.log("번역 :",translatedText);
+
+      let messagelist = translatedText.split('!');
+      console.log(messagelist)
+      data.message = messagelist[0]
+      data.message2 = messagelist[1]
+      data.message3 = messagelist[2]
       io.emit("receive_translate_stt_message",data)
       
     } else {
