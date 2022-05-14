@@ -252,7 +252,7 @@ socket.on("translate_stt_message",data=> {
 
 // httpsServer.listen
 
-httpServer.listen(80, () => {
+httpServer.listen(8080, () => {
   console.log('HTTP Server is running at 8080!');
   console.log("server is healthy")
 });
